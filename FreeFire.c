@@ -1,70 +1,199 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
-// Código da Ilha – Edição Free Fire
-// Nível: Mestre
-// Este programa simula o gerenciamento avançado de uma mochila com componentes coletados durante a fuga de uma ilha.
-// Ele introduz ordenação com critérios e busca binária para otimizar a gestão dos recursos.
+// Definição da struct Item com os campos solicitados
+struct Item {
+    char nome[30];
+    char tipo[20];
+    int quantidade;
+};
 
-int main() {
-    // Menu principal com opções:
-    // 1. Adicionar um item
-    // 2. Remover um item
-    // 3. Listar todos os itens
-    // 4. Ordenar os itens por critério (nome, tipo, prioridade)
-    // 5. Realizar busca binária por nome
-    // 0. Sair
+// Vetor global para armazenar até 10 itens
+struct Item mochila[10];
+int totalItens = 0; // Contador de itens cadastrados
 
-    // A estrutura switch trata cada opção chamando a função correspondente.
-    // A ordenação e busca binária exigem que os dados estejam bem organizados.
-
-    return 0;
+// Função para cadastrar um novo item na mochila
+void inserirItem() {
+    // Verifica se a mochila está cheia
+    if (totalItens >= 10) {
+        printf("\n❌ Mochila cheia! Não é possível adicionar mais itens.\n");
+        return;
+    }
+    
+    printf("\n=== CADASTRO DE ITEM ===\n");
+    
+    // Limpa o buffer do teclado
+    while (getchar() != '\n');
+    
+    // Leitura do nome do item
+    printf("Nome do item: ");
+    fgets(mochila[totalItens].nome, 30, stdin);
+    mochila[totalItens].nome[strcspn(mochila[totalItens].nome, "\n")] = '\0'; // Remove o \n
+    
+    // Leitura do tipo do item
+    printf("Tipo (arma, municao, cura): ");
+    fgets(mochila[totalItens].tipo, 20, stdin);
+    mochila[totalItens].tipo[strcspn(mochila[totalItens].tipo, "\n")] = '\0'; // Remove o \n
+    
+    // Leitura da quantidade
+    printf("Quantidade: ");
+    scanf("%d", &mochila[totalItens].quantidade);
+    
+    totalItens++;
+    printf("✅ Item cadastrado com sucesso!\n");
+    
+    // Lista todos os itens após o cadastro
+    listarItens();
 }
 
-// Struct Item:
-// Representa um componente com nome, tipo, quantidade e prioridade (1 a 5).
-// A prioridade indica a importância do item na montagem do plano de fuga.
+// Função para remover um item da mochila pelo nome
+void removerItem() {
+    if (totalItens == 0) {
+        printf("\n❌ Mochila vazia! Não há itens para remover.\n");
+        return;
+    }
+    
+    printf("\n=== REMOÇÃO DE ITEM ===\n");
+    
+    char nomeBusca[30];
+    
+    // Limpa o buffer do teclado
+    while (getchar() != '\n');
+    
+    // Leitura do nome do item a ser removido
+    printf("Digite o nome do item a ser removido: ");
+    fgets(nomeBusca, 30, stdin);
+    nomeBusca[strcspn(nomeBusca, "\n")] = '\0'; // Remove o \n
+    
+    // Busca pelo item na mochila
+    int indice = -1;
+    for (int i = 0; i < totalItens; i++) {
+        if (strcmp(mochila[i].nome, nomeBusca) == 0) {
+            indice = i;
+            break;
+        }
+    }
+    
+    // Se encontrou o item, remove deslocando os itens seguintes
+    if (indice != -1) {
+        printf("✅ Item '%s' removido com sucesso!\n", mochila[indice].nome);
+        
+        // Desloca os itens para preencher o espaço vazio
+        for (int i = indice; i < totalItens - 1; i++) {
+            mochila[i] = mochila[i + 1];
+        }
+        
+        totalItens--;
+    } else {
+        printf("❌ Item '%s' não encontrado na mochila.\n", nomeBusca);
+    }
+    
+    // Lista todos os itens após a remoção
+    listarItens();
+}
 
-// Enum CriterioOrdenacao:
-// Define os critérios possíveis para a ordenação dos itens (nome, tipo ou prioridade).
+// Função para listar todos os itens da mochila
+void listarItens() {
+    printf("\n=== LISTA DE ITENS NA MOCHILA ===\n");
+    
+    if (totalItens == 0) {
+        printf("Mochila vazia!\n");
+        return;
+    }
+    
+    printf("%-30s %-20s %-10s\n", "NOME", "TIPO", "QUANTIDADE");
+    printf("------------------------------------------------------------\n");
+    
+    for (int i = 0; i < totalItens; i++) {
+        printf("%-30s %-20s %-10d\n", 
+               mochila[i].nome, 
+               mochila[i].tipo, 
+               mochila[i].quantidade);
+    }
+    printf("Total de itens: %d/10\n", totalItens);
+}
 
-// Vetor mochila:
-// Armazena até 10 itens coletados.
-// Variáveis de controle: numItens (quantidade atual), comparacoes (análise de desempenho), ordenadaPorNome (para controle da busca binária).
+// Função de busca sequencial por nome
+void buscarItem() {
+    if (totalItens == 0) {
+        printf("\n❌ Mochila vazia! Não há itens para buscar.\n");
+        return;
+    }
+    
+    printf("\n=== BUSCA DE ITEM ===\n");
+    
+    char nomeBusca[30];
+    
+    // Limpa o buffer do teclado
+    while (getchar() != '\n');
+    
+    // Leitura do nome do item a ser buscado
+    printf("Digite o nome do item a ser buscado: ");
+    fgets(nomeBusca, 30, stdin);
+    nomeBusca[strcspn(nomeBusca, "\n")] = '\0'; // Remove o \n
+    
+    // Busca sequencial pelo item
+    int encontrado = 0;
+    for (int i = 0; i < totalItens; i++) {
+        if (strcmp(mochila[i].nome, nomeBusca) == 0) {
+            printf("\n✅ Item encontrado!\n");
+            printf("Nome: %s\n", mochila[i].nome);
+            printf("Tipo: %s\n", mochila[i].tipo);
+            printf("Quantidade: %d\n", mochila[i].quantidade);
+            encontrado = 1;
+            break;
+        }
+    }
+    
+    if (!encontrado) {
+        printf("❌ Item '%s' não encontrado na mochila.\n", nomeBusca);
+    }
+}
 
-// limparTela():
-// Simula a limpeza da tela imprimindo várias linhas em branco.
+// Função para exibir o menu principal
+void exibirMenu() {
+    printf("\n=== SISTEMA DE GERENCIAMENTO DA MOCHILA ===\n");
+    printf("1. Cadastrar item\n");
+    printf("2. Remover item\n");
+    printf("3. Listar todos os itens\n");
+    printf("4. Buscar item por nome\n");
+    printf("5. Sair do sistema\n");
+    printf("Escolha uma opção (1-5): ");
+}
 
-// exibirMenu():
-// Apresenta o menu principal ao jogador, com destaque para status da ordenação.
-
-// inserirItem():
-// Adiciona um novo componente à mochila se houver espaço.
-// Solicita nome, tipo, quantidade e prioridade.
-// Após inserir, marca a mochila como "não ordenada por nome".
-
-// removerItem():
-// Permite remover um componente da mochila pelo nome.
-// Se encontrado, reorganiza o vetor para preencher a lacuna.
-
-// listarItens():
-// Exibe uma tabela formatada com todos os componentes presentes na mochila.
-
-// menuDeOrdenacao():
-// Permite ao jogador escolher como deseja ordenar os itens.
-// Utiliza a função insertionSort() com o critério selecionado.
-// Exibe a quantidade de comparações feitas (análise de desempenho).
-
-// insertionSort():
-// Implementação do algoritmo de ordenação por inserção.
-// Funciona com diferentes critérios de ordenação:
-// - Por nome (ordem alfabética)
-// - Por tipo (ordem alfabética)
-// - Por prioridade (da mais alta para a mais baixa)
-
-// buscaBinariaPorNome():
-// Realiza busca binária por nome, desde que a mochila esteja ordenada por nome.
-// Se encontrar, exibe os dados do item buscado.
-// Caso contrário, informa que não encontrou o item.
+// Função principal
+int main() {
+    int opcao;
+    
+    printf("Bem-vindo ao Sistema de Gerenciamento da Mochila!\n");
+    
+    do {
+        exibirMenu();
+        scanf("%d", &opcao);
+        
+        switch (opcao) {
+            case 1:
+                inserirItem();
+                break;
+            case 2:
+                removerItem();
+                break;
+            case 3:
+                listarItens();
+                break;
+            case 4:
+                buscarItem();
+                break;
+            case 5:
+                printf("\n🎮 Obrigado por usar o Sistema de Gerenciamento da Mochila!\n");
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("\n❌ Opção inválida! Por favor, escolha uma opção entre 1 e 5.\n");
+        }
+        
+    } while (opcao != 5);
+    
+    return 0;
+}
